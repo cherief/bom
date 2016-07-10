@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.frame {
+  fill: none;
+  stroke: #000;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis line,
+.axis circle {
+  fill: none;
+  stroke: #777;
+  stroke-dasharray: 1,4;
+}
+
+.axis :last-of-type circle {
+  stroke: #333;
+  stroke-dasharray: none;
+}
+
+.line {
+  fill: none;
+  stroke: red;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script src="colorbrewer.js"></script>
+
+
+<script>
+
+
+
+// var data = d3.range(0, 4* Math.PI, .01).map(function(t) {
+//   return [t, Math.sin(4 * t) * Math.cos(2 * t)];
+// });
+
+var width =1100,
+    height = 650,
+    radius = Math.min(width, height) / 2 - 30;
+
+var r = d3.scale.linear()
+    .domain([0, .5])
+    .range([0, 300]);
+
+// var line = d3.svg.line.radial()
+//     .radius(function(d) { return r(d[1]); })
+//     .angle(function(d) { return -d[0] + Math.PI / 2; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var gr = svg.append("g")
+    .attr("class", "r axis")
+  .selectAll("g")
+    .data(r.ticks(5).slice(1))
+  .enter().append("g");
+
+gr.append("circle")
+    .attr("r", r);
+
+var color = d3.scale.category20b();
+
+var color = d3.scale.ordinal()
+    .domain([0,10,10])
+   // .range(colorbrewer.PiYG[9]);
+    .range(colorbrewer.BrBG[10]);
+
+// var color = d3.scale.linear()
+//     .domain([0, 50, 100])
+//     .range(["red", "white", "green"]);
+
+// var color = d3.scale.linear()
+//   .domain([0, 60])
+//   .range(["hsl(200,100%,100%)", "hsl(200,0%,0%)"]);
+
+
+d3.csv("bom-data.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.date = d.date;
+        d.temp = +d.temp;
+        d.apparent = +d.apparent;
+        d.wind_dir = d.wind_dir;
+        d.wind_kmh = d.wind_kmh;
+        d.wind_color = d.wind_color;
+    
+
+
+    var arc = d3.svg.arc()
+        .innerRadius(0)
+        .outerRadius(d.wind_kmh*5)
+        .startAngle(d.wind_dir*0.985) //converting from degs to radians
+        .endAngle(d.wind_dir*1.015) //just radians
+
+    svg.append("path")
+        .attr("d", arc)
+        .attr("transform", "translate(0,0)")
+        .attr("fill", color(d.wind_color));
+            })
+ });
+
+// gr.append("text")
+//     .attr("y", function(d) { return -r(d) - 4; })
+//     .attr("transform", "rotate(15)")
+//     .style("text-anchor", "middle")
+//     .text(function(d) { return d; });
+
+// var ga = svg.append("g")
+//     .attr("class", "a axis")
+//   .selectAll("g")
+//     .data(d3.range(0, 360, 30))
+//   .enter().append("g")
+//     .attr("transform", function(d) { return "rotate(" + -d + ")"; });
+
+// ga.append("line")
+//     .attr("x2", radius);
+
+// ga.append("text")
+//     .attr("x", radius + 6)
+//     .attr("dy", ".35em")
+//     .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
+//     .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (radius + 6) + ",0)" : null; })
+//     .text(function(d) { return d + "°"; });
+
+// svg.append("path")
+//     .datum(data)
+//     .attr("class", "line")
+//     .attr("d", line);
+
+</script>
